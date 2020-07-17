@@ -6,7 +6,8 @@ Created on Thu Jul 16 20:41:08 2020
 """
 
 """ 
-Modifying cfg/yolov4_custom_train and cfg/yolov4_custom_test.cfg
+Generating custom cfg/yolov4_custom_train.cfg
+and cfg/yolov4_custom_test.cfg
 
 """
 
