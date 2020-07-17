@@ -6,6 +6,32 @@ import cv2
 import numpy as np
 import time
 import darknet
+import argparse
+
+# !python darknet_video -v -c -w 
+# augument parser
+ap = argparse.ArgumentParser()
+ap.add_argument("-v" ,"--video", type=str, required=True, 
+                help="Path to input video")
+ap.add_argument("-c","--config", default="./config.json",
+               help="Path to yolo config file")
+ap.add_argument("-w","--weights",type=str, required=True,
+                help="Path to yolo weight")
+ap.add_argument("-l","--label",type=str, default="./data/classes.names",
+                help="Path to label file")
+ap.add_argument("-m","--meta",type=str, default="./data/yolov4.data",
+                help="Path to metaPath")
+ap.add_argument("-o","--output",type=str, default="./output.mp4",
+                help="Path to output file")
+
+args = vars(ap.parse_args())
+
+def check_argument(args):
+    assert os.path.isfile(args["video"]) == True, "Can't find " + args["video"]
+    assert os.path.isfile(args["config"]) == True, "Can't find " + args["config"]
+    assert os.path.isfile(args["weights"]) == True, "Can't find " + args["weights"]
+    assert os.path.isfile(args["meta"]) == True, "Can't find " + args["meta"]
+    assert os.path.isfile(args["label"]) == True, "Can't find " + args["label"]
 
 def convertBack(x, y, w, h):
     xmin = int(round(x - (w / 2)))
@@ -25,12 +51,14 @@ def cvDrawBoxes(detections, img):
             float(x), float(y), float(w), float(h))
         pt1 = (xmin, ymin)
         pt2 = (xmax, ymax)
-        cv2.rectangle(img, pt1, pt2, (0, 255, 0), 1)
+        color = [int(c) for c in COLORS[LABELS.index(detection[0].decode())]]
+        #print(color, type(color))
+        cv2.rectangle(img, pt1, pt2, color, 1)
         cv2.putText(img,
                     detection[0].decode() +
                     " [" + str(round(detection[1] * 100, 2)) + "]",
                     (pt1[0], pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                    [0, 255, 0], 2)
+                    color, 2)
     return img
 
 
@@ -41,10 +69,23 @@ altNames = None
 
 def YOLO():
 
-    global metaMain, netMain, altNames
-    configPath = "./cfg/yolov4.cfg"
-    weightPath = "./yolov4.weights"
-    metaPath = "./cfg/coco.data"
+
+    global metaMain, netMain, altNames, COLORS, LABELS
+    
+    videoPath = args["video"]
+    configPath = args["config"]
+    weightPath = args["weights"]
+    metaPath = args["meta"]
+    labelsPath = args["label"]
+    outputPath = args ["output"]
+    
+    check_argument(args)
+    
+    LABELS = open(labelsPath).read().strip().split("\n")
+    #print(LABELS, len(LABELS))
+    np.random.seed(42)
+    COLORS = np.random.randint(0, 255, size=(len(LABELS), 3), dtype="uint8")
+    
     if not os.path.exists(configPath):
         raise ValueError("Invalid config path `" +
                          os.path.abspath(configPath)+"`")
@@ -80,20 +121,26 @@ def YOLO():
         except Exception:
             pass
     #cap = cv2.VideoCapture(0)
-    cap = cv2.VideoCapture("test.mp4")
+    cap = cv2.VideoCapture(videoPath)
     cap.set(3, 1280)
     cap.set(4, 720)
     out = cv2.VideoWriter(
-        "output.avi", cv2.VideoWriter_fourcc(*"MJPG"), 10.0,
+        "{}".format(outputPath), cv2.VideoWriter_fourcc(*"DIVX"), 18.0,
         (darknet.network_width(netMain), darknet.network_height(netMain)))
-    print("Starting the YOLO loop...")
+    print("[INFO] Starting the YOLO loop...")
 
     # Create an image we reuse for each detect
     darknet_image = darknet.make_image(darknet.network_width(netMain),
                                     darknet.network_height(netMain),3)
+
+    print("[INFO] Start processed video...")                                    
     while True:
         prev_time = time.time()
         ret, frame_read = cap.read()
+
+        if not ret:
+          break
+
         frame_rgb = cv2.cvtColor(frame_read, cv2.COLOR_BGR2RGB)
         frame_resized = cv2.resize(frame_rgb,
                                    (darknet.network_width(netMain),
@@ -105,11 +152,12 @@ def YOLO():
         detections = darknet.detect_image(netMain, metaMain, darknet_image, thresh=0.25)
         image = cvDrawBoxes(detections, frame_resized)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        print(1/(time.time()-prev_time))
-        cv2.imshow('Demo', image)
+        #print(1/(time.time()-prev_time))
+        out.write(image)
+        #cv2.imshow('Demo', image)
         cv2.waitKey(3)
     cap.release()
     out.release()
-
+    print("[INFO] Saved processed video as {}...".format(outputPath))                                    
 if __name__ == "__main__":
     YOLO()
