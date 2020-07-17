@@ -1,5 +1,5 @@
 classes = 4
 train = data/train.txt
 valid = data/test.txt
-names = /data/classes.names
+names = data/classes.names
 backup = backup
