@@ -158,6 +158,6 @@ def YOLO():
         cv2.waitKey(3)
     cap.release()
     out.release()
-    print("[INFO] Save processed video as {}...".format(outputPath))                                    
+    print('[INFO] Save processed video as "{}"'.format(outputPath))                                    
 if __name__ == "__main__":
     YOLO()
