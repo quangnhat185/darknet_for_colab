@@ -127,13 +127,13 @@ def YOLO():
     out = cv2.VideoWriter(
         "{}".format(outputPath), cv2.VideoWriter_fourcc(*"DIVX"), 18.0,
         (darknet.network_width(netMain), darknet.network_height(netMain)))
-    print("[INFO] Starting the YOLO loop...")
+    print("[INFO] Start the YOLO loop...")
 
     # Create an image we reuse for each detect
     darknet_image = darknet.make_image(darknet.network_width(netMain),
                                     darknet.network_height(netMain),3)
 
-    print("[INFO] Start processed video...")                                    
+    print("[INFO] Start processing video...")                                    
     while True:
         prev_time = time.time()
         ret, frame_read = cap.read()
@@ -158,6 +158,6 @@ def YOLO():
         cv2.waitKey(3)
     cap.release()
     out.release()
-    print("[INFO] Saved processed video as {}...".format(outputPath))                                    
+    print("[INFO] Save processed video as {}...".format(outputPath))                                    
 if __name__ == "__main__":
     YOLO()
