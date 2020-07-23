@@ -64,7 +64,7 @@ More details about the meaning of each parameter can be found [here](https://git
          
          
     ```
-    !python darknet_video.py -v examples/test_video.mp4 -c cfg/yolov4_custom_test.cfg -w backup/yolov4_custom_train_last.weights -o output.mp4
+    !python darknet_video.py -v {video path} -c cfg/yolov4_custom_test.cfg -w backup/yolov4_custom_train_last.weights -o output.mp4
     ```
 
     
