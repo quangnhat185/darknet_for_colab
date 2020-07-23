@@ -37,7 +37,7 @@ More details about the meaning of each parameter can be found [here](https://git
 - Image (predicted image is saved at `predictions.jpg`:
     ```
     %cp data/yolov4.data cfg/coco.data
-    !./darknet detect cfg/yolov4_custom_test.cfg backup/yolov4_custom_train_last.weights {img_path}
+    !./darknet detect cfg/yolov4_custom_test.cfg {weights_path} {img_path}
     ```
 
          
@@ -64,7 +64,7 @@ More details about the meaning of each parameter can be found [here](https://git
          
          
     ```
-    !python darknet_video.py -v {video path} -c cfg/yolov4_custom_test.cfg -w backup/yolov4_custom_train_last.weights -o output.mp4
+    !python darknet_video.py -v {video path} -c cfg/yolov4_custom_test.cfg -w {weights_path}  -o output.mp4
     ```
 
     
