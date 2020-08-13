@@ -71,7 +71,7 @@ More details about the meaning of each parameter can be found [here](https://git
 ## Tutorial
 [YOLOv4 in Google Colab: Train your Custom Dataset (Traffic Signs) with ease](https://medium.com/@quangnhatnguyenle/yolov4-in-google-colab-train-your-custom-dataset-traffic-signs-with-ease-3243ca91c81d)
 
-<p align="center><img src="./results/yolov4_traffic_sign_detection.jpg" width=640></img></p>
+<p align="center"><img src="./results/yolov4_traffic_sign_detection.jpg" width=640></img></p>
                                                                        
 ## License
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
