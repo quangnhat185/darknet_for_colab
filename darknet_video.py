@@ -23,6 +23,8 @@ ap.add_argument("-m","--meta",type=str, default="./data/yolov4.data",
                 help="Path to metaPath")
 ap.add_argument("-o","--output",type=str, default="./output.mp4",
                 help="Path to output file")
+ap.add_argument("--csv",type=str, default="./output.csv",
+                help="Path to csv file")
 
 args = vars(ap.parse_args())
 
@@ -61,6 +63,12 @@ def cvDrawBoxes(detections, img):
                     color, 2)
     return img
 
+def coordinates(csv, detections, frame):
+    for detection in detections:
+        detection_class, confidence = str(detection[0].decode()), str(round(detection[1] * 100, 2))
+        x, y = str(detection[2][0]/512.), str(detection[2][1]/512.)
+        line = [str(frame), detection_class, confidence, x, y]
+        csv.write(','.join(line) + '\n')
 
 netMain = None
 metaMain = None
@@ -77,7 +85,8 @@ def YOLO():
     weightPath = args["weights"]
     metaPath = args["meta"]
     labelsPath = args["label"]
-    outputPath = args ["output"]
+    outputPath = args["output"]
+    csvPath = args["csv"]
     
     check_argument(args)
     
@@ -133,7 +142,14 @@ def YOLO():
     darknet_image = darknet.make_image(darknet.network_width(netMain),
                                     darknet.network_height(netMain),3)
 
-    print("[INFO] Start processing video...")                                    
+    print("[INFO] Start processing video...")
+
+    frame = 0
+    csv = None
+    if csvPath:
+        csv = open(csvPath, 'w')
+        csv.write('frame,class,confidence,x_center,y_center\n')
+
     while True:
         prev_time = time.time()
         ret, frame_read = cap.read()
@@ -150,14 +166,24 @@ def YOLO():
         darknet.copy_image_from_bytes(darknet_image,frame_resized.tobytes())
 
         detections = darknet.detect_image(netMain, metaMain, darknet_image, thresh=0.25)
+
+        if csvPath:
+            coordinates(csv, detections, frame)
+            frame += 1
+
         image = cvDrawBoxes(detections, frame_resized)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         #print(1/(time.time()-prev_time))
         out.write(image)
         #cv2.imshow('Demo', image)
         cv2.waitKey(3)
+
     cap.release()
     out.release()
-    print('[INFO] Save processed video as "{}"'.format(outputPath))                                    
+    if csvPath:
+        csv.close()
+        print('[INFO] Save csv as "{}"'.format(outputPath)) 
+
+    print('[INFO] Save processed video as "{}"'.format(csvPath))                                    
 if __name__ == "__main__":
     YOLO()
